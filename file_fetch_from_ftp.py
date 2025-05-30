@@ -9,8 +9,8 @@ class FTPFileFetcher:
         self.username = username
         self.password = password
         self.ftp = ftplib.FTP(host)
-        self.datetime_vrd = datetime.datetime(2025, 5, 10).strftime("%d-%b-%Y")
-        self.datetime_mis = datetime.datetime(2025, 5, 10).strftime("%d%m%Y")
+        self.datetime_vrd = datetime.datetime.now().strftime("%d-%b-%Y")
+        self.datetime_mis = datetime.datetime.now().strftime("%d%m%Y")
     
     def _dir_create_in_local(self, local_path, status):
         if status == 'vrd':

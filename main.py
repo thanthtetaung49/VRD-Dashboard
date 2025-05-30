@@ -12,29 +12,28 @@ from config import INPUT_BASE_DIR, OUTPUT_BASE_DIR
 
 class main_app:
     def __init__(self):
-        self.monthFormat = datetime.datetime(2025, 5, 10).strftime("%b")
-        self.day = datetime.datetime(2025, 5, 10).strftime("%d")
+        self.monthFormat = datetime.datetime.now().strftime("%b")
+        self.day = datetime.datetime.now().strftime("%d")
         self.outputFile = f"{OUTPUT_BASE_DIR}\\Daily_Report_{self.monthFormat}.xlsx"
         self.productOfferFile = f"{INPUT_BASE_DIR}\\Product_Offer\\ProductOffer.xlsx"
         self.productOfferFileOld =  f"{INPUT_BASE_DIR}\\Product_Offer\\ProductOfferOld.xlsx"
-        self.datetime_vrd = datetime.datetime(2025, 5, 10).strftime("%d-%b-%Y")
-        self.datetime_mis = datetime.datetime(2025, 5, 10).strftime("%d%m%Y")
-        self.workbook = load_workbook(self.outputFile)
+        self.datetime_vrd = datetime.datetime.now().strftime("%d-%b-%Y")
+        self.datetime_mis = datetime.datetime.now().strftime("%d%m%Y")
         
     def _close_workbook(self):
         self.workbook.close()
 
     def run(self):
         try:
-            # workbook = load_workbook(self.outputFile)
-            sheet = self.workbook.active
+            workbook = load_workbook(self.outputFile)
+            sheet = workbook.active
             print("Excel file found.")
             print("Writing dashboard label...")
             
             if (sheet.max_column > 2):
                 self._clear_total_column(sheet, sheet.max_column)
                 
-                self.workbook.save(self.outputFile)
+                workbook.save(self.outputFile)
                 print("Clearing first column of cell...")
                 
             self._write_dashboard_label()
@@ -42,9 +41,9 @@ class main_app:
             print("Excel file not found.")
             print("Creating File...")
             
-            self.workbook = Workbook()
+            workbook = Workbook()
             
-            self.workbook.save(self.outputFile)
+            workbook.save(self.outputFile)
             print("New workbook created.")
             
             self._write_dashboard_label()
@@ -96,13 +95,14 @@ class main_app:
         print("Product offer old updated.")
         
     def _clear_cell_of_label(self):
-        sheet = self.workbook.active
+        workbook = load_workbook(self.outputFile)
+        sheet = workbook.active
         
         for row in range(1, sheet.max_row + 1):
             sheet[f"A{row}"].value = None
             
         
-        self.workbook.save(self.outputFile)
+        workbook.save(self.outputFile)
         print("First columns of cell are cleared")
 
     def _cleaning_data(self):
@@ -229,8 +229,6 @@ if __name__ == "__main__":
     print("Dashboard generation completed successfully.")
     generate_total_summary_dashboard()
     print("Total summary dashboard generation completed successfully.")
-    app._close_workbook()
-    print("Workbook closed.")
     print("VRD Operation completed successfully.")
     app._purging_dir()
     send_email_main()

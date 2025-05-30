@@ -8,8 +8,8 @@ from config import LEGACY_EMAIL_IP, THC_EMAIL_IP, SMTP_PORT, SOURCE_EMAIL_ADDRES
 
 class send_eamil():
     def __init__(self):
-        self.monthFormat = datetime.datetime(2025, 5, 10).strftime("%b")
-        self.dateFromat = datetime.datetime(2025, 5, 10).strftime("%d")
+        self.monthFormat = datetime.datetime.now().strftime("%b")
+        self.dateFromat = datetime.datetime.now().strftime("%d")
         self.smtp_servers = [LEGACY_EMAIL_IP, THC_EMAIL_IP]
         self.smtp_port = SMTP_PORT 
         self.from_email = SOURCE_EMAIL_ADDRESS

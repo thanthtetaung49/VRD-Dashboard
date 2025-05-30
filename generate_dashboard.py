@@ -8,14 +8,14 @@ from config import INPUT_BASE_DIR, OUTPUT_BASE_DIR
 
 class WritingValue:
     def __init__(self, total_attempt_call, total_login_agent, total_success_call, product_counts, status):
-        self.monthFormat = datetime.datetime(2025, 5, 10).strftime("%b")
+        self.monthFormat = datetime.datetime.now().strftime("%b")
         self.outputFile = f"{OUTPUT_BASE_DIR}\\Daily_Report_{self.monthFormat}.xlsx"
         self.total_attempt_call = total_attempt_call
         self.total_login_agent = total_login_agent
         self.total_success_call = total_success_call
         self.product_counts = product_counts
         self.status = status
-        self.datetime = datetime.datetime(2025, 5, 10).strftime("%d-%b")
+        self.datetime = datetime.datetime.now().strftime("%d-%b")
 
     def writingValueInExcel(self):
         workbook = load_workbook(self.outputFile)
@@ -52,7 +52,6 @@ class WritingValue:
         product_total_formula = self._write_product_formulas(sheet, product_df)
         self._write_summary_formulas(sheet, filtered_summary_df, summary_coords, total_revenue_formula, product_total_formula)
         self._style_sheet(sheet, label_df, self.datetime)
-        
         
         workbook.save(self.outputFile)
         
@@ -129,7 +128,8 @@ class WritingValue:
     def _merge_product_counts(self, productOffer):
         merged = pd.merge(self.product_counts, productOffer, left_on='OFFERID', right_on='Product ID', how='left')
         merged = merged.drop('Product ID', axis=1)
-        merged['price_per_pack'] = merged['Offer Name'].str.extract(r'(\d+)\s*ks')[0].astype(int)
+        merged['price_per_pack'] = merged['Offer Name'].str.extract(r'(\d+)\s*K')[0]
+        merged['price_per_pack'] = merged['price_per_pack'].apply(lambda x: x + '000').astype(int)
         merged['total_amount'] = merged['COUNT OF PACK SALES'] * merged['price_per_pack']
         return merged
 
@@ -139,6 +139,8 @@ class WritingValue:
         team_df.loc[idx('Total Attempts Calls'), 'value'] = self.total_attempt_call['Total Attempts Calls'][0]
         team_df.loc[idx('Total Login Agent'), 'value'] = self.total_login_agent['Total Login Agent'][0]
         team_df.loc[idx('Total Success Call'), 'value'] = self.total_success_call['Total Success Call'][0]
+
+        # print(team_df)
 
         attempts = self.total_attempt_call['Total Attempts Calls'][0]
         successes = self.total_success_call['Total Success Call'][0]
@@ -164,10 +166,12 @@ class WritingValue:
     def _prepare_product_df(self, grouped, productOffer):
         product_df = pd.merge(grouped, productOffer, left_on='cell_value', right_on='Offer Name', how='left')
         product_df = product_df.dropna(subset=['Product ID', 'Offer Name']).copy()
-        product_df['price_per_pack'] = product_df['Offer Name'].str.extract(r'(\d+)\s*ks')[0].astype(int)
+        product_df['price_per_pack'] = product_df['Offer Name'].str.extract(r'(\d+)\s*K')[0].astype(int)
         return product_df
 
     def _build_total_revenue_formula(self, product_df):
+        product_df['price_per_pack'] = product_df['price_per_pack'].astype(str).apply(lambda x: x + '000')
+        product_df['price_per_pack'] = product_df['price_per_pack'].astype(int)
         formula = '+'.join([f"({coords[0]} * {price})" for coords, price in zip(product_df['cell_coordinate'], product_df['price_per_pack'])])
         return f"={formula}"
 
@@ -213,7 +217,7 @@ class WritingValueTeam2(WritingValue):
     pass
 
 def generate_dashboard_main():
-    datetime_vrd = datetime.datetime(2025, 5, 10).strftime("%d-%b-%Y")
+    datetime_vrd = datetime.datetime.now().strftime("%d-%b-%Y")
     
     # Team 1
     reports_vmd1 = GenerateReports(f"{INPUT_BASE_DIR}\\Formatted_VMD\\{datetime_vrd}\\OUTBOUND_REPORT_VMD1.csv")
@@ -221,6 +225,7 @@ def generate_dashboard_main():
     total_login_agent = pd.DataFrame([reports_vmd1.total_login_agents()], columns=['Total Login Agent'])
     total_success_call = pd.DataFrame([reports_vmd1.total_success_calls()], columns=['Total Success Call'])
     product_counts = reports_vmd1.product_counts()
+
     resultTeam1 = WritingValue(total_attempt_call, total_login_agent, total_success_call, product_counts, status="team 1")
     resultTeam1.writingValueInExcel()
 
@@ -232,6 +237,9 @@ def generate_dashboard_main():
     product_counts = reports_vmd2.product_counts()
     resultTeam2 = WritingValueTeam2(total_attempt_call, total_login_agent, total_success_call, product_counts, status="team 2")
     resultTeam2.writingValueInExcel()
+
+
+    # print(total_attempt_call, total_login_agent, total_success_call, product_counts)
 
 if __name__ == "__main__":
     generate_dashboard_main()

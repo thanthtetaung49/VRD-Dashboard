@@ -7,9 +7,9 @@ from config import OUTPUT_BASE_DIR
 
 class TotalSummary:
     def __init__(self):
-        self.monthFormat = datetime.datetime(2025, 5, 10).strftime("%b")
+        self.monthFormat = datetime.datetime.now().strftime("%b")
         self.outputFile = f"{OUTPUT_BASE_DIR}\\Daily_Report_{self.monthFormat}.xlsx"
-        self.datetime = datetime.datetime(2025, 5, 10).strftime("%y-%b-%d")
+        self.datetime = datetime.datetime.now().strftime("%y-%b-%d")
     
     def generate_summary(self):
         workbook = load_workbook(self.outputFile)
@@ -27,7 +27,6 @@ class TotalSummary:
         self._set_headers(sheet, df, col_letter, actual_max_col)
         self._set_borders(sheet, max_col)
         self.autofit_columns(sheet)
-        
         
         workbook.save(self.outputFile)
         
@@ -146,7 +145,7 @@ class TotalSummary:
         end_column = actual_max_col
         
         all_coords = []
-        
+
         for i in range(start_column, end_column + 1):
             col_letter = get_column_letter(i)
             cell_coord = [f"{col_letter}{coord}" for coord in coord_numbers]
@@ -154,9 +153,9 @@ class TotalSummary:
             all_coords.append(cell_coord)
             
         for cell in zip(cell_coord_1, *all_coords):
-            formula = f"=ROUNDUP(AVERAGE({','.join(cell[1:])}))"
+            formula = f"=ROUNDUP(AVERAGE({','.join(cell[1:])}), 0)"
             sheet[cell[0]] = formula
-            
+
 def total_summary_main():
     total_summary = TotalSummary()
     total_summary.generate_summary()

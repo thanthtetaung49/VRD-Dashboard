@@ -7,7 +7,7 @@ class GenerateReports:
     def __init__(self, outboundFile):
         self.df = pd.read_csv(outboundFile)
         self.productOffer = pd.read_csv(f"{INPUT_BASE_DIR}\\Product_Offer\\ProductOffer.csv")
-        self.datetime_mis = datetime.datetime(2025, 5, 10).strftime("%d%m%Y")
+        self.datetime_mis = datetime.datetime.now().strftime("%d%m%Y")
         
         file_pattern = f"{INPUT_BASE_DIR}\\MIS_Pack_Sale\\{self.datetime_mis}\\Daily_Pack_Sales_Report_*.csv"
         matched_files = glob.glob(file_pattern)
